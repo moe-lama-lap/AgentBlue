@@ -1,9 +1,11 @@
 package com.example.agentdroid
 
+import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -61,6 +63,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -788,6 +791,21 @@ fun SettingsCard(
     onOpenAccessibilitySettings: () -> Unit,
     onOpenOverlaySettings: () -> Unit
 ) {
+    val context = LocalContext.current
+    var hasMicPermission by remember {
+        mutableStateOf(
+            context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    val micPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasMicPermission = granted
+        if (!granted) {
+            Toast.makeText(context, "Microphone permission is required for voice input.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -824,6 +842,25 @@ fun SettingsCard(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Overlay Permission", modifier = Modifier.padding(vertical = 4.dp))
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = {
+                    if (hasMicPermission) {
+                        Toast.makeText(context, "Microphone permission already granted.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    if (hasMicPermission) "Microphone Permission (Granted)" else "Microphone Permission (STT)",
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
             }
         }
     }
