@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.agentdroid"
+    namespace = "com.moelama.agentblue"
     compileSdk = 36
 
     defaultConfig {
