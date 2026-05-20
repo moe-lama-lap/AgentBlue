@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.agent_blue_desktop"
+    namespace = "com.moelama.agentblue"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
